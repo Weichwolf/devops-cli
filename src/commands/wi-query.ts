@@ -2,9 +2,19 @@ import { Command } from "commander";
 import { DevOpsClient } from "../client.js";
 import { Config } from "../config.js";
 
-interface WiqlResponse {
+interface WiqlFlatResponse {
   workItems: { id: number }[];
 }
+
+interface WiqlLinkResponse {
+  workItemRelations: {
+    source: { id: number } | null;
+    target: { id: number };
+    rel: string | null;
+  }[];
+}
+
+type WiqlResponse = WiqlFlatResponse | WiqlLinkResponse;
 
 interface WorkItemField {
   "System.Id": number;
@@ -50,7 +60,13 @@ export async function wiQuery(
     { query: wiql }
   );
 
-  const allIds = result.workItems.map((w) => w.id);
+  const allIds = "workItems" in result
+    ? result.workItems.map((w) => w.id)
+    : [...new Set(
+        result.workItemRelations
+          .filter((r) => r.source === null)
+          .map((r) => r.target.id)
+      )];
 
   if (allIds.length === 0) {
     if (opts.json) {
