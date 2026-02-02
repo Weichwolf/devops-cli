@@ -9,73 +9,108 @@ Built as a tool for AI coding agents (Claude Code, etc.) to autonomously manage 
 ```bash
 npm install
 npm run build
-npm link
+npm link        # makes 'devops-cli' available globally
 ```
 
 Requires Node.js 18+.
 
 ## Setup
 
-Set environment variables:
-
 ```bash
 export DEVOPS_CLI_ORG="your-organization"
-export DEVOPS_CLI_PAT="your-personal-access-token"
+export DEVOPS_CLI_PAT="your-personal-access-token"   # Scope: Work Items R/W
 ```
 
-The PAT needs **Work Items Read/Write** scope.
+## Commands
 
-## Usage
+All output is TSV by default. Add `--json` to any command for JSON output.
 
-All commands live under `devops-cli wi` and require `--project`:
+### Project-level (requires `--project`)
 
 ```bash
 devops-cli --project MyProject wi <command>
 ```
 
-### List work items
+#### List work items
 
 ```bash
-wi list [--state <s>] [--type <t>] [--assigned-to <name>] [--parent <id>] [--area-path <p>] [--iteration <p>] [--top <n>]
+wi list [--state <s>] [--type <t>] [--assigned-to <name>] [--parent <id>] \
+        [--area-path <p>] [--iteration <p>] [--top <n>] [--json]
 ```
 
-### Show a work item
+#### Show a work item
 
 ```bash
-wi show <id>
+wi show <id> [--comments] [--json]
 ```
 
-### Create a work item
+`--comments` fetches the comment thread instead of work item details.
+
+#### Comment on a work item
 
 ```bash
-wi create --type <t> --title <title> --description <desc> [--acceptance-criteria <ac>] [--parent <id>] [--block <id>] [--tags <csv>]
+wi comment <id> <text> [--json]
+```
+
+#### Create a work item
+
+```bash
+wi create --type <t> --title <title> --description <desc> \
+          [--acceptance-criteria <ac>] [--parent <id>] [--block <id>] \
+          [--area-path <p>] [--iteration <p>] [--tags <csv>] [--json]
 ```
 
 `--description` is required for all types. `--acceptance-criteria` is required for User Stories.
 
-### Update work items
+#### Update work items
 
 ```bash
-wi update <id,id,...> [--state <s>] [--title <t>] [--assign <name>] [--tags <csv>] [--description <d>] [--acceptance-criteria <ac>] [--block <id>] [--unblock <id>]
+wi update <id[,id,...]> [--state <s>] [--title <t>] [--assign <name>] \
+          [--tags <csv>] [--description <d>] [--acceptance-criteria <ac>] \
+          [--area-path <p>] [--iteration <p>] \
+          [--block <id>] [--unblock <id>] [--json]
 ```
 
 Accepts comma-separated IDs for batch updates.
 
-### Tree view
+#### Tree view
 
 ```bash
-wi tree <id> [--depth <n>]
+wi tree <id> [--depth <n>] [--json]
 ```
 
-### WIQL query
+#### WIQL query
 
 ```bash
-wi query "<wiql>"
+wi query "<wiql>" [--json]
 ```
 
-### Output format
+### Org-level (no `--project` needed)
 
-All commands output TSV by default. Add `--json` for JSON.
+Cross-project commands that query the entire organization.
+
+#### Status overview
+
+```bash
+org status [--by area|iteration] [--state <s>] [--assigned-to <name>] \
+           [--since <days>] [--json]
+```
+
+Aggregated view: work item type counts per project (or area/iteration), newest change date per group. Default: open items changed within 90 days. The `--since` default is skipped when `--assigned-to` is set.
+
+#### List across projects
+
+```bash
+org list [--state <s>] [--type <t>] [--assigned-to <name>] \
+         [--area-path <p>] [--iteration <p>] [--since <days>] \
+         [--top <n>] [--json]
+```
+
+Like `wi list` but across all projects. Includes project and priority columns. Same `--since` behavior as `org status`.
+
+## API
+
+Azure DevOps REST API v7.1. Comments use v7.1-preview.4. Auth via Basic Auth (`:PAT`).
 
 ## Stack
 
