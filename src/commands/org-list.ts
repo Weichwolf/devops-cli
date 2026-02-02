@@ -54,7 +54,6 @@ const BATCH_SIZE = 200;
 const DEFAULT_SINCE = 90;
 
 function buildWiql(opts: OrgListOptions): string {
-  const since = opts.since ? parseInt(opts.since, 10) : DEFAULT_SINCE;
   let query = "SELECT [System.Id] FROM WorkItems WHERE [System.State] <> ''";
 
   if (opts.state) {
@@ -63,7 +62,10 @@ function buildWiql(opts: OrgListOptions): string {
     query += " AND [System.State] NOT IN ('Closed', 'Removed', 'Done')";
   }
 
-  query += ` AND [System.ChangedDate] >= @Today - ${since}`;
+  const since = opts.since ? parseInt(opts.since, 10) : (opts.assignedTo ? 0 : DEFAULT_SINCE);
+  if (since > 0) {
+    query += ` AND [System.ChangedDate] >= @Today - ${since}`;
+  }
   if (opts.type) {
     query += " AND [System.WorkItemType] = '" + opts.type + "'";
   }

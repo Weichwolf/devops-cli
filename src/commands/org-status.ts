@@ -48,7 +48,6 @@ const BATCH_SIZE = 200;
 const DEFAULT_SINCE = 90;
 
 function buildWiql(opts: StatusOptions): string {
-  const since = opts.since ? parseInt(opts.since, 10) : DEFAULT_SINCE;
   let query = "SELECT [System.Id] FROM WorkItems WHERE [System.State] <> ''";
 
   if (opts.state) {
@@ -65,7 +64,10 @@ function buildWiql(opts: StatusOptions): string {
     query += " AND [System.AssignedTo] = " + value;
   }
 
-  query += ` AND [System.ChangedDate] >= @Today - ${since}`;
+  const since = opts.since ? parseInt(opts.since, 10) : (opts.assignedTo ? 0 : DEFAULT_SINCE);
+  if (since > 0) {
+    query += ` AND [System.ChangedDate] >= @Today - ${since}`;
+  }
 
   return query;
 }
@@ -141,8 +143,9 @@ export async function orgStatus(
   }
 
   console.log("");
-  const since = opts.since ? parseInt(opts.since, 10) : DEFAULT_SINCE;
-  console.log(ids.length + " item(s) in " + rows.length + " group(s) (changed within " + since + " days)");
+  const sinceVal = opts.since ? parseInt(opts.since, 10) : (opts.assignedTo ? 0 : DEFAULT_SINCE);
+  const sinceInfo = sinceVal > 0 ? " (changed within " + sinceVal + " days)" : "";
+  console.log(ids.length + " item(s) in " + rows.length + " group(s)" + sinceInfo);
 }
 
 export function registerOrgStatus(
