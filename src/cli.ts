@@ -33,7 +33,7 @@ COMMANDS (project-level, requires --project):
   wi query "<wiql>" [--json]
 
 COMMANDS (org-level, no --project needed):
-  org status [--by area|iteration] [--state <s>] [--json]
+  org status [--by area|iteration] [--state <s>] [--assigned-to <name>] [--since <days>] [--json]
   org list [--state <s>] [--type <t>] [--assigned-to <name>] [--area-path <p>] [--iteration <p>] [--top <n>] [--json]
 
 RULES:

@@ -22,6 +22,7 @@ interface WorkItemsBatchResponse {
 interface StatusOptions {
   by?: string;
   state?: string;
+  assignedTo?: string;
   since?: string;
   top?: string;
   json?: boolean;
@@ -54,6 +55,14 @@ function buildWiql(opts: StatusOptions): string {
     query += " AND [System.State] = '" + opts.state + "'";
   } else {
     query += " AND [System.State] NOT IN ('Closed', 'Removed', 'Done')";
+  }
+
+  if (opts.assignedTo) {
+    const value =
+      opts.assignedTo.toLowerCase() === "me"
+        ? "@me"
+        : "'" + opts.assignedTo + "'";
+    query += " AND [System.AssignedTo] = " + value;
   }
 
   query += ` AND [System.ChangedDate] >= @Today - ${since}`;
@@ -144,6 +153,7 @@ export function registerOrgStatus(
     .description("Org-wide work item status overview")
     .option("--by <grouping>", "Group by: area, iteration (default: project)")
     .option("--state <state>", "Filter by state")
+    .option("--assigned-to <name>", 'Filter by assigned user ("me" for yourself)')
     .option("--since <days>", "Changed within N days (default: 90)")
     .option("--json", "Output as JSON")
     .action(async (opts: StatusOptions) => {
