@@ -20,6 +20,7 @@ interface WorkItemsBatchResponse {
 }
 
 interface ShowOptions {
+  comments?: boolean;
   json?: boolean;
 }
 
@@ -189,15 +190,12 @@ export function registerWiShow(
   wi.command("show")
     .description("Show a work item")
     .argument("<id>", "Work item ID")
-    .argument("[subcommand]", "Subcommand: comments")
+    .option("--comments", "Show comments instead of work item details")
     .option("--json", "Output raw JSON")
-    .action(async (id: string, subcommand: string | undefined, opts: ShowOptions) => {
+    .action(async (id: string, opts: ShowOptions) => {
       const { client, config } = clientFactory();
-      if (subcommand === "comments") {
+      if (opts.comments) {
         await wiShowComments(client, id, opts);
-      } else if (subcommand) {
-        console.error(`Error: Unknown subcommand "${subcommand}". Use "comments".`);
-        process.exit(1);
       } else {
         await wiShow(client, config, id, opts);
       }
