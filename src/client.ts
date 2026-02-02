@@ -19,18 +19,20 @@ export class DevOpsClient {
     path: string,
     method: string = "GET",
     body?: unknown,
-    contentType: string = "application/json"
+    contentType: string = "application/json",
+    apiVersion: string = API_VERSION
   ): Promise<T> {
-    return this.doRequest<T>(this.baseUrl, path, method, body, contentType);
+    return this.doRequest<T>(this.baseUrl, path, method, body, contentType, apiVersion);
   }
 
   requestOrg<T = unknown>(
     path: string,
     method: string = "GET",
     body?: unknown,
-    contentType: string = "application/json"
+    contentType: string = "application/json",
+    apiVersion: string = API_VERSION
   ): Promise<T> {
-    return this.doRequest<T>(this.orgBaseUrl, path, method, body, contentType);
+    return this.doRequest<T>(this.orgBaseUrl, path, method, body, contentType, apiVersion);
   }
 
   private doRequest<T>(
@@ -38,10 +40,11 @@ export class DevOpsClient {
     path: string,
     method: string,
     body?: unknown,
-    contentType: string = "application/json"
+    contentType: string = "application/json",
+    apiVersion: string = API_VERSION
   ): Promise<T> {
     const separator = path.includes("?") ? "&" : "?";
-    const url = `${base}${path}${separator}api-version=${API_VERSION}`;
+    const url = `${base}${path}${separator}api-version=${apiVersion}`;
 
     return new Promise<T>((resolve, reject) => {
       const req = https.request(url, {

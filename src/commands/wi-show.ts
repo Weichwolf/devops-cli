@@ -84,8 +84,10 @@ export async function wiShow(
   const state = f["System.State"] as string;
   const title = f["System.Title"] as string;
   const assigned = displayName(f["System.AssignedTo"]);
+  const createdBy = displayName(f["System.CreatedBy"]);
   const created = formatDate(f["System.CreatedDate"]);
   const changed = formatDate(f["System.ChangedDate"]);
+  const commentCount = f["System.CommentCount"] as number | undefined;
   const priority = f["Microsoft.VSTS.Common.Priority"] as number | undefined;
   const areaPath = f["System.AreaPath"] as string | undefined;
   const iterationPath = f["System.IterationPath"] as string | undefined;
@@ -104,8 +106,10 @@ export async function wiShow(
   if (areaPath) tsv("areaPath", areaPath);
   if (iterationPath) tsv("iterationPath", iterationPath);
   if (assigned) tsv("assigned", assigned);
+  if (createdBy) tsv("createdBy", createdBy);
   if (created) tsv("created", created);
   if (changed) tsv("changed", changed);
+  if (commentCount) tsv("comments", String(commentCount));
   if (tags) tsv("tags", tags);
   if (description) tsv("description", collapseNewlines(description));
   if (acceptanceCriteria) tsv("acceptanceCriteria", collapseNewlines(acceptanceCriteria));
@@ -134,6 +138,50 @@ export async function wiShow(
   }
 }
 
+interface CommentsResponse {
+  totalCount: number;
+  count: number;
+  comments: {
+    id: number;
+    text: string;
+    createdBy: { displayName: string };
+    createdDate: string;
+  }[];
+}
+
+async function wiShowComments(
+  client: DevOpsClient,
+  id: string,
+  opts: ShowOptions
+): Promise<void> {
+  const result = await client.request<CommentsResponse>(
+    `/wit/workitems/${id}/comments?order=asc`,
+    "GET",
+    undefined,
+    "application/json",
+    "7.1-preview.4"
+  );
+
+  if (opts.json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  if (result.comments.length === 0) {
+    console.log("No comments.");
+    return;
+  }
+
+  const collapseNewlines = (s: string) => stripHtml(s).replace(/\n/g, "\\n");
+
+  for (const c of result.comments) {
+    const date = c.createdDate?.slice(0, 10) ?? "";
+    const author = c.createdBy?.displayName ?? "";
+    const text = collapseNewlines(c.text);
+    console.log(`${date}\t${author}\t${text}`);
+  }
+}
+
 export function registerWiShow(
   wi: Command,
   clientFactory: () => { client: DevOpsClient; config: Config }
@@ -141,9 +189,17 @@ export function registerWiShow(
   wi.command("show")
     .description("Show a work item")
     .argument("<id>", "Work item ID")
+    .argument("[subcommand]", "Subcommand: comments")
     .option("--json", "Output raw JSON")
-    .action(async (id: string, opts: ShowOptions) => {
+    .action(async (id: string, subcommand: string | undefined, opts: ShowOptions) => {
       const { client, config } = clientFactory();
-      await wiShow(client, config, id, opts);
+      if (subcommand === "comments") {
+        await wiShowComments(client, id, opts);
+      } else if (subcommand) {
+        console.error(`Error: Unknown subcommand "${subcommand}". Use "comments".`);
+        process.exit(1);
+      } else {
+        await wiShow(client, config, id, opts);
+      }
     });
 }

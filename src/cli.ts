@@ -11,6 +11,7 @@ import { registerWiCreate } from "./commands/wi-create.js";
 import { registerWiUpdate } from "./commands/wi-update.js";
 import { registerWiTree } from "./commands/wi-tree.js";
 import { registerWiQuery } from "./commands/wi-query.js";
+import { registerWiComment } from "./commands/wi-comment.js";
 import { registerOrgStatus } from "./commands/org-status.js";
 import { registerOrgList } from "./commands/org-list.js";
 
@@ -26,7 +27,8 @@ Output: TSV default, --json for JSON
 
 COMMANDS (project-level, requires --project):
   wi list [--state <s>] [--type <t>] [--assigned-to <name>] [--parent <id>] [--area-path <p>] [--iteration <p>] [--top <n>] [--json]
-  wi show <id> [--json]
+  wi show <id> [comments] [--json]
+  wi comment <id> <text> [--json]
   wi create --type <t> --title <title> --description <desc> [--acceptance-criteria <ac>] [--parent <id>] [--block <id>] [--area-path <p>] [--iteration <p>] [--tags <csv>] [--json]
   wi update <id[,id,...]> [--state <s>] [--title <t>] [--assign <name>] [--tags <csv>] [--description <d>] [--acceptance-criteria <ac>] [--area-path <p>] [--iteration <p>] [--block <id>] [--unblock <id>] [--json]
   wi tree <id> [--depth <n>] [--json]
@@ -68,6 +70,7 @@ registerWiCreate(wi, createClient);
 registerWiUpdate(wi, createClient);
 registerWiTree(wi, createClient);
 registerWiQuery(wi, createClient);
+registerWiComment(wi, createClient);
 
 function createOrgClient(): { client: DevOpsClient; config: OrgConfig } {
   const config = getOrgConfig();
