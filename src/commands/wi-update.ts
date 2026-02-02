@@ -15,6 +15,8 @@ interface UpdateOptions {
   tags?: string;
   description?: string;
   acceptanceCriteria?: string;
+  areaPath?: string;
+  iteration?: string;
   block?: string;
   unblock?: string;
   json?: boolean;
@@ -52,6 +54,12 @@ function buildFieldOps(opts: UpdateOptions): JsonPatchOp[] {
   if (opts.acceptanceCriteria) {
     ops.push({ op: "replace", path: "/fields/Microsoft.VSTS.Common.AcceptanceCriteria", value: opts.acceptanceCriteria });
   }
+  if (opts.areaPath) {
+    ops.push({ op: "replace", path: "/fields/System.AreaPath", value: opts.areaPath });
+  }
+  if (opts.iteration) {
+    ops.push({ op: "replace", path: "/fields/System.IterationPath", value: opts.iteration });
+  }
 
   return ops;
 }
@@ -66,7 +74,7 @@ export async function wiUpdate(
   const hasRelationOps = !!(opts.block || opts.unblock);
 
   if (fieldOps.length === 0 && !hasRelationOps) {
-    console.error("Error: No update options specified. Use --state, --title, --assign, --tags, --description, --acceptance-criteria, --block, or --unblock.");
+    console.error("Error: No update options specified. Use --state, --title, --assign, --tags, --description, --acceptance-criteria, --area-path, --iteration, --block, or --unblock.");
     process.exit(1);
   }
 
@@ -157,6 +165,8 @@ export function registerWiUpdate(
     .option("--tags <tags>", "Set tags (comma-separated)")
     .option("--description <desc>", "Set description")
     .option("--acceptance-criteria <criteria>", "Set acceptance criteria")
+    .option("--area-path <path>", "Set area path")
+    .option("--iteration <path>", "Set iteration path")
     .option("--block <id>", "Add dependency (this blocks given ID)")
     .option("--unblock <id>", "Remove dependency to given ID")
     .option("--json", "Output raw JSON")

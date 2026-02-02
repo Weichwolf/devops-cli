@@ -86,6 +86,9 @@ export async function wiShow(
   const assigned = displayName(f["System.AssignedTo"]);
   const created = formatDate(f["System.CreatedDate"]);
   const changed = formatDate(f["System.ChangedDate"]);
+  const priority = f["Microsoft.VSTS.Common.Priority"] as number | undefined;
+  const areaPath = f["System.AreaPath"] as string | undefined;
+  const iterationPath = f["System.IterationPath"] as string | undefined;
   const tags = f["System.Tags"] as string | undefined;
   const description = f["System.Description"] as string | undefined;
   const acceptanceCriteria = f["Microsoft.VSTS.Common.AcceptanceCriteria"] as string | undefined;
@@ -97,6 +100,9 @@ export async function wiShow(
   tsv("type", type);
   tsv("state", state);
   tsv("title", title);
+  if (priority) tsv("priority", String(priority));
+  if (areaPath) tsv("areaPath", areaPath);
+  if (iterationPath) tsv("iterationPath", iterationPath);
   if (assigned) tsv("assigned", assigned);
   if (created) tsv("created", created);
   if (changed) tsv("changed", changed);

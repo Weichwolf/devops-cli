@@ -1,16 +1,18 @@
 import https from "node:https";
-import { Config } from "./config.js";
+import { Config, OrgConfig } from "./config.js";
 
 const API_VERSION = "7.1";
 
 export class DevOpsClient {
   private readonly auth: string;
   private readonly baseUrl: string;
+  private readonly orgBaseUrl: string;
 
-  constructor(private readonly config: Config) {
+  constructor(private readonly config: OrgConfig & { baseUrl?: string }) {
     this.auth =
       "Basic " + Buffer.from(`:${config.pat}`).toString("base64");
-    this.baseUrl = config.baseUrl;
+    this.baseUrl = config.baseUrl ?? "";
+    this.orgBaseUrl = `https://dev.azure.com/${config.org}/_apis`;
   }
 
   request<T = unknown>(
@@ -19,8 +21,27 @@ export class DevOpsClient {
     body?: unknown,
     contentType: string = "application/json"
   ): Promise<T> {
+    return this.doRequest<T>(this.baseUrl, path, method, body, contentType);
+  }
+
+  requestOrg<T = unknown>(
+    path: string,
+    method: string = "GET",
+    body?: unknown,
+    contentType: string = "application/json"
+  ): Promise<T> {
+    return this.doRequest<T>(this.orgBaseUrl, path, method, body, contentType);
+  }
+
+  private doRequest<T>(
+    base: string,
+    path: string,
+    method: string,
+    body?: unknown,
+    contentType: string = "application/json"
+  ): Promise<T> {
     const separator = path.includes("?") ? "&" : "?";
-    const url = `${this.baseUrl}${path}${separator}api-version=${API_VERSION}`;
+    const url = `${base}${path}${separator}api-version=${API_VERSION}`;
 
     return new Promise<T>((resolve, reject) => {
       const req = https.request(url, {

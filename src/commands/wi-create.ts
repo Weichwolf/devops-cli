@@ -16,6 +16,8 @@ interface CreateOptions {
   parent?: string;
   block?: string;
   tags?: string;
+  areaPath?: string;
+  iteration?: string;
   json?: boolean;
 }
 
@@ -41,6 +43,13 @@ function buildPatchBody(config: Config, opts: CreateOptions): JsonPatchOp[] {
       path: "/fields/Microsoft.VSTS.Common.AcceptanceCriteria",
       value: opts.acceptanceCriteria,
     });
+  }
+
+  if (opts.areaPath) {
+    ops.push({ op: "add", path: "/fields/System.AreaPath", value: opts.areaPath });
+  }
+  if (opts.iteration) {
+    ops.push({ op: "add", path: "/fields/System.IterationPath", value: opts.iteration });
   }
 
   if (opts.tags) {
@@ -128,6 +137,8 @@ export function registerWiCreate(
     .option("--acceptance-criteria <criteria>", "Acceptance criteria (required for User Story)")
     .option("--parent <id>", "Parent work item ID")
     .option("--block <id>", "Block another work item (set dependency)")
+    .option("--area-path <path>", "Area path")
+    .option("--iteration <path>", "Iteration path")
     .option("--tags <tags>", "Comma-separated tags")
     .option("--json", "Output raw JSON")
     .action(async (opts: CreateOptions) => {

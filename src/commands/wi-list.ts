@@ -18,6 +18,7 @@ interface WorkItemField {
   "System.Title": string;
   "System.State": string;
   "System.WorkItemType": string;
+  "Microsoft.VSTS.Common.Priority": number;
 }
 
 interface WorkItemsBatchResponse {
@@ -29,6 +30,7 @@ interface WorkItemRow {
   id: number;
   type: string;
   state: string;
+  priority: number;
   title: string;
 }
 
@@ -48,6 +50,7 @@ const FIELDS = [
   "System.Title",
   "System.State",
   "System.WorkItemType",
+  "Microsoft.VSTS.Common.Priority",
 ].join(",");
 
 const BATCH_SIZE = 200;
@@ -85,9 +88,9 @@ function printTable(items: WorkItemRow[]): void {
     return;
   }
 
-  console.log("ID\tType\tState\tTitle");
+  console.log("ID\tType\tState\tPri\tTitle");
   for (const item of items) {
-    console.log(item.id + "\t" + item.type + "\t" + item.state + "\t" + item.title);
+    console.log(item.id + "\t" + item.type + "\t" + item.state + "\t" + item.priority + "\t" + item.title);
   }
 
   console.log("");
@@ -142,6 +145,7 @@ export async function wiList(
         id: wi.fields["System.Id"],
         type: wi.fields["System.WorkItemType"],
         state: wi.fields["System.State"],
+        priority: wi.fields["Microsoft.VSTS.Common.Priority"] ?? 0,
         title: wi.fields["System.Title"],
       });
     }
