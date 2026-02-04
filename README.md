@@ -108,6 +108,18 @@ org list [--state <s>] [--type <t>] [--assigned-to <name>] \
 
 Like `wi list` but across all projects. Includes project and priority columns. Same `--since` behavior as `org status`.
 
+### Skill
+
+```bash
+devops-cli skill
+```
+
+Outputs the Claude Code skill definition as JSON. Use this to install or update the skill:
+
+```bash
+devops-cli skill | jq -r '.files[0].content' > .claude/skills/devops-cli/SKILL.md
+```
+
 ## API
 
 Azure DevOps REST API v7.1. Comments use v7.1-preview.4. Auth via Basic Auth (`:PAT`).

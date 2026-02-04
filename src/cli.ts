@@ -14,6 +14,7 @@ import { registerWiQuery } from "./commands/wi-query.js";
 import { registerWiComment } from "./commands/wi-comment.js";
 import { registerOrgStatus } from "./commands/org-status.js";
 import { registerOrgList } from "./commands/org-list.js";
+import { registerSkill } from "./commands/skill.js";
 
 const pkg = JSON.parse(
   readFileSync(join(__dirname, "..", "package.json"), "utf-8")
@@ -81,5 +82,6 @@ const org = program.command("org").description("Organization-wide commands");
 
 registerOrgStatus(org, createOrgClient);
 registerOrgList(org, createOrgClient);
+registerSkill(program);
 
 program.parse();
