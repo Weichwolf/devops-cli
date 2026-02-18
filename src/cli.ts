@@ -26,9 +26,11 @@ ENV: DEVOPS_CLI_ORG, DEVOPS_CLI_PAT
 Flag: --project <project> (required, set per repo in CLAUDE.md)
 Output: TSV default, --json for JSON
 
+COMMANDS (no --project needed):
+  wi show <id> [--comments] [--json]
+
 COMMANDS (project-level, requires --project):
   wi list [--state <s>] [--type <t>] [--assigned-to <name>] [--parent <id>] [--area-path <p>] [--iteration <p>] [--top <n>] [--json]
-  wi show <id> [--comments] [--json]
   wi comment <id> <text> [--json]
   wi create --type <t> --title <title> --description <desc> [--acceptance-criteria <ac>] [--parent <id>] [--block <id>] [--area-path <p>] [--iteration <p>] [--tags <csv>] [--json]
   wi update <id[,id,...]> [--state <s>] [--title <t>] [--assign <name>] [--tags <csv>] [--description <d>] [--acceptance-criteria <ac>] [--area-path <p>] [--iteration <p>] [--block <id>] [--unblock <id>] [--json]
@@ -66,7 +68,7 @@ function createClient(): { client: DevOpsClient; config: Config } {
 const wi = program.command("wi").description("Work item commands");
 
 registerWiList(wi, createClient);
-registerWiShow(wi, createClient);
+registerWiShow(wi, createOrgClient);
 registerWiCreate(wi, createClient);
 registerWiUpdate(wi, createClient);
 registerWiTree(wi, createClient);

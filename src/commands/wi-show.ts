@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import { DevOpsClient } from "../client.js";
-import { Config } from "../config.js";
+import { OrgConfig } from "../config.js";
 
 interface WorkItemRelation {
   rel: string;
@@ -67,11 +67,11 @@ function displayName(identity: unknown): string {
 
 export async function wiShow(
   client: DevOpsClient,
-  _config: Config,
+  _config: OrgConfig,
   id: string,
   opts: ShowOptions
 ): Promise<void> {
-  const wi = await client.request<WorkItemResponse>(
+  const wi = await client.requestOrg<WorkItemResponse>(
     `/wit/workitems/${id}?$expand=relations`
   );
 
@@ -81,6 +81,7 @@ export async function wiShow(
   }
 
   const f = wi.fields;
+  const project = f["System.TeamProject"] as string;
   const type = f["System.WorkItemType"] as string;
   const state = f["System.State"] as string;
   const title = f["System.Title"] as string;
@@ -100,6 +101,7 @@ export async function wiShow(
   const collapseNewlines = (s: string) => stripHtml(s).replace(/\n/g, "\\n");
 
   tsv("id", String(wi.id));
+  tsv("project", project);
   tsv("type", type);
   tsv("state", state);
   tsv("title", title);
@@ -122,7 +124,7 @@ export async function wiShow(
 
     const titleMap = new Map<number, string>();
     if (relIds.length > 0) {
-      const batch = await client.request<WorkItemsBatchResponse>(
+      const batch = await client.requestOrg<WorkItemsBatchResponse>(
         "/wit/workitems?ids=" + relIds.join(",") + "&fields=System.Title"
       );
       for (const item of batch.value) {
@@ -155,7 +157,7 @@ async function wiShowComments(
   id: string,
   opts: ShowOptions
 ): Promise<void> {
-  const result = await client.request<CommentsResponse>(
+  const result = await client.requestOrg<CommentsResponse>(
     `/wit/workitems/${id}/comments?order=asc`,
     "GET",
     undefined,
@@ -185,7 +187,7 @@ async function wiShowComments(
 
 export function registerWiShow(
   wi: Command,
-  clientFactory: () => { client: DevOpsClient; config: Config }
+  clientFactory: () => { client: DevOpsClient; config: OrgConfig }
 ): void {
   wi.command("show")
     .description("Show a work item")
