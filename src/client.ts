@@ -35,6 +35,18 @@ export class DevOpsClient {
     return this.doRequest<T>(this.orgBaseUrl, path, method, body, contentType, apiVersion);
   }
 
+  requestForProject<T = unknown>(
+    project: string,
+    path: string,
+    method: string = "GET",
+    body?: unknown,
+    contentType: string = "application/json",
+    apiVersion: string = API_VERSION
+  ): Promise<T> {
+    const base = `https://dev.azure.com/${this.config.org}/${encodeURIComponent(project)}/_apis`;
+    return this.doRequest<T>(base, path, method, body, contentType, apiVersion);
+  }
+
   private doRequest<T>(
     base: string,
     path: string,

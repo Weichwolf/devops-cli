@@ -157,7 +157,10 @@ async function wiShowComments(
   id: string,
   opts: ShowOptions
 ): Promise<void> {
-  const result = await client.requestOrg<CommentsResponse>(
+  const wi = await client.requestOrg<WorkItemResponse>(`/wit/workitems/${id}`);
+  const project = wi.fields["System.TeamProject"] as string;
+  const result = await client.requestForProject<CommentsResponse>(
+    project,
     `/wit/workitems/${id}/comments?order=asc`,
     "GET",
     undefined,
